@@ -54,7 +54,7 @@ fn main() {
         .x_label_area_size(35)
         .y_label_area_size(40)
         .margin(5)
-        .caption("Histogram Test", ("sans-serif", 50.0))
+        .caption("Density of Normalised Values", ("sans-serif", 50.0))
         .build_cartesian_2d((0u32..10u32).into_segmented(), 0u32..10u32).expect("chart assign error");
 
     chart
@@ -62,7 +62,7 @@ fn main() {
         .disable_x_mesh()
         .bold_line_style(WHITE.mix(0.3))
         .y_desc("Count")
-        .x_desc("Bucket")
+        .x_desc("Bucket (should be scale of 0 to 1 but i'm working on it...)")
         .axis_desc_style(("sans-serif", 15))
         .draw().expect("chart config error");
 
