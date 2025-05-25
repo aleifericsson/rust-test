@@ -1,6 +1,7 @@
-use std::io;
 use rand::Rng;
 use plotters::prelude::*;
+use std::{io, fs, path::Path};
+use tiny_http::{Server, Response, StatusCode, Header};
 
 const OUT_FILE_NAME: &str = "histogram.png";
 
@@ -9,6 +10,42 @@ fn calc_normalised(min:i32, max:i32, num:i32) -> f64{
 }
 
 fn main() {
+    // ----- SERVER ----- //
+    let server = Server::http("127.0.0.1:5001").unwrap();
+    println!("Server running at http://localhost:5001");
+
+    for request in server.incoming_requests() {
+        let url = request.url();
+        let path = if url == "/" {
+            "static/index.html".to_string()
+        } else {
+            format!("static{}", url)
+        };
+
+        let file_path = Path::new(&path);
+
+        if file_path.exists() && file_path.is_file() {
+            let content = fs::read(file_path).unwrap_or_else(|_| b"Error reading file".to_vec());
+            let content_type = match file_path.extension().and_then(|e| e.to_str()) {
+                Some("html") => "text/html",
+                Some("css") => "text/css",
+                Some("js") => "application/javascript",
+                Some("png") => "image/png",
+                Some("jpg") | Some("jpeg") => "image/jpeg",
+                Some("svg") => "image/svg+xml",
+                _ => "application/octet-stream",
+            };
+            let response = Response::from_data(content)
+                .with_header(Header::from_bytes(&b"Content-Type"[..], content_type).unwrap());
+            request.respond(response).unwrap();
+        } else {
+            let response = Response::from_string("404 Not Found")
+                .with_status_code(StatusCode(404));
+            request.respond(response).unwrap();
+        }
+    }
+
+    // ----- MAIN ----- //
     let mut rng = rand::rng();
     let mut count = 1;
     let mut norm_data: Vec<u32> = vec![];
@@ -46,6 +83,7 @@ fn main() {
         count += 1;
     }
 
+    // ------ GRAPH ----- //
     let root = BitMapBackend::new(OUT_FILE_NAME, (640, 480)).into_drawing_area();
 
     root.fill(&WHITE).expect("root fill error");

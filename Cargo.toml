@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 plotters = "0.3.7"
 rand = "0.9.1"
+tiny_http = "0.12.0"
