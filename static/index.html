@@ -12,5 +12,21 @@
     <div></div>
     <button>button</button>
     <script src="script.js"></script>
+    <div>
+        <form id="numberForm">
+            <label for="min">Min:</label>
+            <input type="number" id="min" name="min" value="0" required><br><br>
+
+            <label for="max">Max:</label>
+            <input type="number" id="max" name="max" value="1" required><br><br>
+
+            <label for="iter">Iterations:</label>
+            <input type="number" id="iter" name="iter" required min="1" value="1"><br><br>
+
+            <button type="submit" name="action" value="submit">Submit</button>
+            <button type="submit" name="action" value="end">End</button>
+        </form>
+    </div>
+    <script src="program.js"></script>
 </body>
 </html>

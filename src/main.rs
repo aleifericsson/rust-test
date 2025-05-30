@@ -2,6 +2,8 @@ use rand::Rng;
 use plotters::prelude::*;
 use std::{io, fs, path::Path};
 use tiny_http::{Server, Response, StatusCode, Header};
+use simple_websockets::{Event, Responder};
+use std::collections::HashMap;
 
 const OUT_FILE_NAME: &str = "histogram.png";
 
@@ -11,10 +13,18 @@ fn calc_normalised(min:i32, max:i32, num:i32) -> f64{
 
 fn main() {
     // ----- SERVER ----- //
-    let server = Server::http("127.0.0.1:5001").unwrap();
-    println!("Server running at http://localhost:5001");
+    let server = Server::http("0.0.0.0:5001").unwrap();
+    let event_hub = simple_websockets::launch(5002)
+        .expect("failed to listen on port 5002");
+    // map between client ids and the client's `Responder`:
+    let mut clients: HashMap<u64, Responder> = HashMap::new();
 
     for request in server.incoming_requests() {
+        println!("received request! method: {:?}, url: {:?}, headers: {:?}",
+            request.method(),
+            request.url(),
+            request.headers()
+        );
         let url = request.url();
         let path = if url == "/" {
             "static/index.html".to_string()
@@ -51,6 +61,7 @@ fn main() {
     let mut norm_data: Vec<u32> = vec![];
 
     loop {    
+        /*
         let mut min_str = String::new();
         let mut max_str = String::new();
 
@@ -69,6 +80,32 @@ fn main() {
         let min: i32 = min_str.trim().parse().expect("Please type a number!");
         let max: i32 = max_str.trim().parse().expect("Please type a number!");
 
+        */
+
+        // ----- Web Socket ------ //
+        match event_hub.poll_event() {
+            Event::Connect(client_id, responder) => {
+                println!("A client connected with id #{}", client_id);
+                // add their Responder to our `clients` map:
+                clients.insert(client_id, responder);
+            },
+            Event::Disconnect(client_id) => {
+                println!("Client #{} disconnected.", client_id);
+                // remove the disconnected client from the clients map:
+                clients.remove(&client_id);
+            },
+            Event::Message(client_id, message) => {
+                println!("Received a message from client #{}: {:?}", client_id, message);
+                // retrieve this client's `Responder`:
+                let responder = clients.get(&client_id).unwrap();
+                // echo the message back:
+                responder.send(message);
+            },
+        }
+
+        // ----- MATH ---- //
+        let min =0;
+        let max = 1;
         if min == max{
             break;
         }
