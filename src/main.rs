@@ -61,7 +61,6 @@ fn main() {
     let mut norm_data: Vec<u32> = vec![];
 
     loop {    
-        /*
         let mut min_str = String::new();
         let mut max_str = String::new();
 
@@ -80,9 +79,11 @@ fn main() {
         let min: i32 = min_str.trim().parse().expect("Please type a number!");
         let max: i32 = max_str.trim().parse().expect("Please type a number!");
 
-        */
+        
 
+        
         // ----- Web Socket ------ //
+        /*
         match event_hub.poll_event() {
             Event::Connect(client_id, responder) => {
                 println!("A client connected with id #{}", client_id);
@@ -102,10 +103,11 @@ fn main() {
                 responder.send(message);
             },
         }
+        */
 
         // ----- MATH ---- //
-        let min =0;
-        let max = 1;
+        //let min =0;
+        //let max = 1;
         if min == max{
             break;
         }
